@@ -1,0 +1,6 @@
+program tp;
+var x:integer;
+begin
+print(x);
+print(y);
+end
