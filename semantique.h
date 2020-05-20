@@ -15,25 +15,26 @@
 void debug(const char *message);
 void debugInt(const char *message, int num);
 void fatalError(const char *message);
-void semanticError(char *message, int nbrligne);
+void semanticError(const char *message, int nbrligne);
 
 
 void createDico();
 void resizeDico();
-void addSymbol(char *sym_name, int sym_type, int nbr_args);
-int getSymbol(char *sym_name);
-int exists(char *ident, int type, int inf, int sup, int *ptrPosition);
+void addSymbol(const char *sym_name, int sym_type, int nbr_args);
+int getSymbol(const char *sym_name);
+int exists(const char *ident, int type, int inf, int sup, int *ptrPosition);
+int initSymbol(const char *ident, int nbligne);
 
 // 1. Vérifier qu’une variable n’est déclarée qu’une seule fois
-int checkIfIdentifierIsDeclaredOneTime(char* ident, int type, int nbligne, int *ptr_position);
+int checkIfIdentifierIsDeclaredOneTime(const char* ident, int type, int nbligne, int *ptr_position);
 // 2. Vérifier qu’une variable utilisée est déclarée
-void checkIfIdentifierIsDeclared(char* ident, int type, int nbligne);
+void checkIfIdentifierIsDeclared(const char* ident, int type, int nbligne);
 // 3. Vérifier si les variables utilisées sont initialisées
-void checkIfVariableIsInitialized(char* ident, int type, int nbligne);
+void checkIfVariableIsInitialized(const char* ident, int type, int nbligne);
 // 4. Vérifier si les variables déclarées sont utilisées
-void checkIfVariableIsUsed(char* ident, int type, int nbligne);
+void checkIfVariableIsUsed(const char* ident, int type, int nbligne);
 // 5. Vérifier l’appel des procédures avec les bons arguments
-int checkNbrOfArguments(char* ident, int type, int nbligne);
+int checkNbrOfArguments(const char* ident, int type, int nbligne);
 
 
 int listAll();

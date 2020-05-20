@@ -6,13 +6,13 @@
 
 
 
-  #define TAILLE_INITIALE_DICO 50
-  #define INCREMENT_TAILLE_DICO 25
+#define TAILLE_INITIALE_DICO 50
+#define INCREMENT_TAILLE_DICO 25
 
   
 symbol *dico;
 int maxDico, sommet = 0, base = 0;
-
+int error_semantique = 0;
 
 // Console logs
 
@@ -22,19 +22,17 @@ void fatalError(const char *message) {
 }
 
 void debug(const char *message) {
-  fprintf(stderr, "Debug : %s\n", message);
+  fprintf(stderr, "/** : %s **/\n", message);
 }
 
 void debugInt(const char *message, int num) {
-  fprintf(stderr, "DebugInt : %s : %d\n", message, num);
+  fprintf(stderr, "/** : %s : %d**/\n", message, num);
 }
 
 
-
-
-void semanticError(char *message, int nbrligne) {
+void semanticError(const char *message, int nbrligne) {
   fprintf(stderr, "%s .Erreur ligne: %d\n", message, nbrligne); 
-  exit(-1);
+  error_semantique++;
 }
 
 // Implémentation des méthodes
@@ -44,7 +42,6 @@ void createDico() {
   dico = malloc(maxDico * sizeof(symbol));
   if (dico == NULL)
     fatalError("Erreur interne: pas assez de memoire");
-  //fprintf(stderr, "maxDico %s\n", maxDico);
 
 }
 
@@ -58,8 +55,7 @@ void resizeDico() {
 
 
 
-void addSymbol(char *sym_name, int sym_type, int nbr_args) {
-  int sommet = 0;
+void addSymbol(const char *sym_name, int sym_type, int nbr_args) {
   if (dico == NULL) 
   {
     createDico();
@@ -83,14 +79,10 @@ void addSymbol(char *sym_name, int sym_type, int nbr_args) {
     dico[sommet].test_init = 0; 
     dico[sommet].test_use = 0;  
 
-    
-    // Adding sym_args
-
     sommet++; 
-    listAll();
 }
 
-int getSymbol(char *sym_name) {
+int getSymbol(const char *sym_name) {
   int i = base, j = sommet-1, k;
 
   while (i <= j) {      /* invariant: i <= position <= j + 1 */
@@ -106,9 +98,8 @@ int getSymbol(char *sym_name) {
 
 }
 
-int exists(char *ident, int type, int inf, int sup, int *ptrPosition) {
+int exists(const char *ident, int type, int inf, int sup, int *ptrPosition) {
   int i, j, k;
-
     i = inf;
     j = sup;
     for(k=i; k<=sup;k++) {
@@ -117,17 +108,30 @@ int exists(char *ident, int type, int inf, int sup, int *ptrPosition) {
         return 1;
       }
     }
-
     return 0;
 }
 
 
+int initSymbol(const char *ident, int nbligne) {
+  int position = 0;
+  if(exists(ident, 0, base, sommet, &position)) {
+    dico[position].test_init = 1;
+  } else {
+    semanticError("Ident not declared (is)", nbligne);
+  }
+}
+
+
+
+
+
+
 // 1. Vérifier qu’une variable n’est déclarée qu’une seule fois
-int checkIfIdentifierIsDeclaredOneTime(char* ident, int type, int nbligne, int *ptr_position){
+int checkIfIdentifierIsDeclaredOneTime(const char* ident, int type, int nbligne, int *ptr_position){
   int position = 0;
   int found = 0;
   while(position <= sommet) {  
-    if(exists(ident, type, position, sommet, &position)) {
+    if(exists(ident, type, position, sommet-1, &position)) {
       found++;
     }
     position++;
@@ -141,44 +145,46 @@ int checkIfIdentifierIsDeclaredOneTime(char* ident, int type, int nbligne, int *
 }
 
 // 2. Vérifier qu’une variable utilisée est déclarée
-void checkIfIdentifierIsDeclared(char* ident, int type, int nbligne){
+void checkIfIdentifierIsDeclared(const char* ident, int type, int nbligne){
   int position;
   int found =  checkIfIdentifierIsDeclaredOneTime(ident, type, nbligne, &position);
-  debugInt("Declared one Time ", found);
+  //debugInt("Declared one Time ", found);
   if(found == 0)
-    semanticError("variable non déclarée ligne : ", nbligne);
+    semanticError("Var non déclarée ligne : ", nbligne);
 }
 
 // 3. Vérifier si les variables utilisées sont initialisées
-void checkIfVariableIsInitialized(char* ident, int type, int nbligne){
-  int position;
-  debug("CheckInit");
-  int found =  checkIfIdentifierIsDeclaredOneTime(ident, type, nbligne, &position);
-  if(found == 0)
-    semanticError("Ident not declared", nbligne);
-  if(!(found > 0 && dico[position].test_init == 1))
-    semanticError("Ident not initialized", nbligne);
-  semanticError("Ident not initialized", nbligne);
+void checkIfVariableIsInitialized(const char* ident, int type, int nbligne){
 
+  int position;
+  int found =  exists(ident,type, base,sommet-1, &position);
+  if(found == 0) {
+    semanticError("Ident not declared (ii)", nbligne);
+  } else if (!(found > 0 && dico[position].test_init == 1)) {
+    semanticError("Ident not initialized (ii)", nbligne);
+  }
 }
 
 // 4. Vérifier si les variables déclarées sont utilisées
-void checkIfVariableIsUsed(char* ident, int type, int nbligne){
+void checkIfVariableIsUsed(const char* ident, int type, int nbligne){
  int position;
- int found =  checkIfIdentifierIsDeclaredOneTime(ident, type, nbligne, &position);
+ int found =  exists(ident,type, base,sommet-1, &position);
  if(!(found > 0 && dico[position].test_use == 1))
     semanticError("Ident not initialized in ligne ", nbligne);
 }
 
 
 // 5. Vérifier l’appel des procédures avec les bons arguments
-int checkNbrOfArguments(char* ident, int type, int nbligne){
+int checkNbrOfArguments(const char* ident, int type, int nbligne){
   return 1;
 }
+
 
 int listAll() {
   int i=0;
   for (i; i<=sommet; i++)
-    fprintf(stderr, "List All : %d : sym_name %s\n", i, dico[i].sym_name);
+    fprintf(stderr, "List All : %d : sym_name %s : initialized? : %d\n", i, dico[i].sym_name, dico[i].test_init);
   return 0;
 }
+
+

@@ -22,129 +22,122 @@ Grammar
    10     | ARRAY OPEN_CRO NUMBER DEUX_P error
    11     | ARRAY OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO
 
-   12 declaration: VAR declaration_corps
+   12 declaration: VAR IDENT PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE
+   13            | VAR IDENT PUNCT_DEUX_POINTS type error
+   14            | VAR IDENT error
+   15            | VAR IDENT PUNCT_DEUX_POINTS error
 
-   13 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE
-   14                  | liste_identificateurs PUNCT_DEUX_POINTS type error
-   15                  | liste_identificateurs error
-   16                  | liste_identificateurs PUNCT_DEUX_POINTS error
+   16 liste_declarations: declaration
+   17                   | declaration liste_declarations
 
-   17 liste_declarations: declaration
-   18                   | declaration PUNCT_VIRGULE liste_declarations
+   18 liste_identificateurs: IDENT
+   19                      | IDENT PUNCT_VIRGULE liste_identificateurs
 
-   19 liste_identificateurs: IDENT
-   20                      | IDENT PUNCT_VIRGULE liste_identificateurs
+   20 declaration_methodes: declaration_methode
+   21                     | declaration_methode declaration_methodes
 
-   21 declaration_methodes: declaration_methode
-   22                     | declaration_methode declaration_methodes
+   22 declaration_methode: entete_methode instruction_composee
+   23                    | entete_methode liste_declarations instruction_composee
+   24                    | entete_methode error
+   25                    | entete_methode liste_declarations error
 
-   23 declaration_methode: entete_methode instruction_composee
-   24                    | entete_methode liste_declarations instruction_composee
-   25                    | entete_methode error
-   26                    | entete_methode liste_declarations error
+   26 entete_methode: PROCEDURE IDENT arguments PUNCT_POINT_VIRGULE
+   27               | PROCEDURE IDENT PUNCT_POINT_VIRGULE
+   28               | PROCEDURE IDENT error
+   29               | error IDENT arguments PUNCT_POINT_VIRGULE
+   30               | PROCEDURE error
+   31               | PROCEDURE IDENT arguments error
 
-   27 entete_methode: PROCEDURE IDENT arguments PUNCT_POINT_VIRGULE
-   28               | PROCEDURE IDENT PUNCT_POINT_VIRGULE
-   29               | PROCEDURE IDENT error
-   30               | error IDENT arguments PUNCT_POINT_VIRGULE
-   31               | PROCEDURE error
-   32               | PROCEDURE IDENT arguments error
+   32 arguments: OPEN_PAR liste_parametres CLOSE_PAR
+   33          | OPEN_PAR CLOSE_PAR
+   34          | OPEN_PAR liste_parametres error
+   35          | OPEN_PAR error
 
-   33 arguments: OPEN_PAR liste_parametres CLOSE_PAR
-   34          | OPEN_PAR CLOSE_PAR
-   35          | OPEN_PAR liste_parametres error
-   36          | OPEN_PAR error
+   36 liste_parametres: declaration
+   37                 | declaration liste_parametres
 
-   37 liste_parametres: declaration_corps
-   38                 | declaration_corps PUNCT_POINT_VIRGULE liste_parametres
+   38 instruction_composee: T_BEGIN liste_instructions END
+   39                     | T_BEGIN liste_instructions error
 
-   39 instruction_composee: T_BEGIN liste_instructions END
-   40                     | T_BEGIN liste_instructions error
+   40 liste_instructions: instruction PUNCT_POINT_VIRGULE
+   41                   | instruction error
+   42                   | instruction PUNCT_POINT_VIRGULE liste_instructions
 
-   41 liste_instructions: instruction PUNCT_POINT_VIRGULE
-   42                   | instruction error
-   43                   | instruction PUNCT_POINT_VIRGULE liste_instructions
+   43 instruction: IDENT OPP_AFFECT expression
+   44            | IDENT error
+   45            | appel_methode
+   46            | IF expression THEN instruction ELSE instruction
+   47            | IF error
+   48            | IF expression THEN error
+   49            | IF expression THEN instruction ELSE error
+   50            | IF expression error
+   51            | IF expression THEN instruction error instruction
+   52            | WHILE expression DO instruction
+   53            | WHILE expression error
+   54            | WHILE error
+   55            | WHILE expression DO error
+   56            | PRINT OPEN_PAR liste_identificateurs CLOSE_PAR
+   57            | PRINT error
+   58            | PRINT OPEN_PAR liste_identificateurs error
+   59            | PRINT OPEN_PAR error
 
-   44 instruction: lvalue OPP_AFFECT expression
-   45            | lvalue error
-   46            | appel_methode
-   47            | IF expression THEN instruction ELSE instruction
-   48            | IF error
-   49            | IF expression THEN error
-   50            | IF expression THEN instruction ELSE error
-   51            | IF expression error
-   52            | IF expression THEN instruction error instruction
-   53            | WHILE expression DO instruction
-   54            | WHILE expression error
-   55            | WHILE error
-   56            | WHILE expression DO error
-   57            | PRINT OPEN_PAR liste_identificateurs CLOSE_PAR
-   58            | PRINT error
-   59            | PRINT OPEN_PAR liste_identificateurs error
-   60            | PRINT OPEN_PAR error
+   60 appel_methode: IDENT OPEN_PAR liste_expressions CLOSE_PAR
+   61              | IDENT OPEN_PAR CLOSE_PAR
+   62              | IDENT OPEN_PAR liste_expressions error
 
-   61 lvalue: IDENT
-   62       | IDENT OPEN_CRO expression CLOSE_CRO
-   63       | IDENT OPEN_CRO expression error
-   64       | IDENT OPEN_CRO error
+   63 liste_expressions: expression
+   64                  | liste_expressions PUNCT_VIRGULE expression
 
-   65 appel_methode: IDENT OPEN_PAR liste_expressions CLOSE_PAR
-   66              | IDENT OPEN_PAR CLOSE_PAR
-   67              | IDENT OPEN_PAR liste_expressions error
+   65 expression: facteur
+   66           | facteur ADD_OP facteur
+   67           | facteur MUL_OP facteur
 
-   68 liste_expressions: expression
-   69                  | liste_expressions PUNCT_VIRGULE expression
-
-   70 expression: facteur
-   71           | facteur ADD_OP facteur
-   72           | facteur MUL_OP facteur
-
-   73 facteur: NUMBER
-   74        | IDENT
-   75        | IDENT OPEN_CRO expression CLOSE_CRO
-   76        | IDENT OPEN_CRO expression error
-   77        | IDENT OPEN_CRO error
-   78        | OPEN_PAR expression CLOSE_PAR
-   79        | OPEN_PAR expression error
-   80        | OPEN_PAR error
+   68 facteur: NUMBER
+   69        | IDENT
+   70        | IDENT OPEN_CRO expression CLOSE_CRO
+   71        | IDENT OPEN_CRO expression error
+   72        | IDENT OPEN_CRO error
+   73        | OPEN_PAR expression CLOSE_PAR
+   74        | OPEN_PAR expression error
+   75        | OPEN_PAR error
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-error (256) 4 7 9 10 14 15 16 25 26 29 30 31 32 35 36 40 42 45 48 49
-    50 51 52 54 55 56 58 59 60 63 64 67 76 77 79 80
+error (256) 4 7 9 10 13 14 15 24 25 28 29 30 31 34 35 39 41 44 47 48
+    49 50 51 53 54 55 57 58 59 62 71 72 74 75
 PROGRAM (258) 1 2 3 4
-IDENT (259) 1 2 3 4 19 20 27 28 29 30 32 61 62 63 64 65 66 67 74 75
-    76 77
-COMMENT (260)
-OPP_AFFECT (261) 44
-NUMBER (262) 6 8 10 11 73
-OPEN_PAR (263) 33 34 35 36 57 59 60 65 66 67 78 79 80
-CLOSE_PAR (264) 33 34 57 65 66 78
-MUL_OP (265) 72
-ADD_OP (266) 71
-TYPE (267) 5 6
-KEYWORD (268)
-PUNCT_POINT (269)
-PUNCT_VIRGULE (270) 18 20 69
-PUNCT_POINT_VIRGULE (271) 1 2 3 13 27 28 30 38 41 43
-PUNCT_DEUX_POINTS (272) 13 14 16
-VAR (273) 12
-PROCEDURE (274) 27 28 29 31 32
-END (275) 39
-IF (276) 47 48 49 50 51 52
-THEN (277) 47 49 50 52
-ELSE (278) 47 50
-PRINT (279) 57 58 59 60
-WHILE (280) 53 54 55 56
-DO (281) 53 56
-OPEN_CRO (282) 6 8 9 10 11 62 63 64 75 76 77
-CLOSE_CRO (283) 6 11 62 75
-ARRAY (284) 6 7 8 9 10 11
-OF (285) 6
-DEUX_P (286) 6 8 10 11
-T_BEGIN (287) 39 40
+COMMENT (259)
+OPP_AFFECT (260) 43
+OPEN_PAR (261) 32 33 34 35 56 58 59 60 61 62 73 74 75
+CLOSE_PAR (262) 32 33 56 60 61 73
+MUL_OP (263) 67
+ADD_OP (264) 66
+TYPE (265) 5 6
+KEYWORD (266)
+PUNCT_POINT (267)
+PUNCT_VIRGULE (268) 19 64
+PUNCT_POINT_VIRGULE (269) 1 2 3 12 26 27 29 40 42
+PUNCT_DEUX_POINTS (270) 12 13 15
+VAR (271) 12 13 14 15
+PROCEDURE (272) 26 27 28 30 31
+END (273) 38
+IF (274) 46 47 48 49 50 51
+THEN (275) 46 48 49 51
+ELSE (276) 46 49
+PRINT (277) 56 57 58 59
+WHILE (278) 52 53 54 55
+DO (279) 52 55
+OPEN_CRO (280) 6 8 9 10 11 70 71 72
+CLOSE_CRO (281) 6 11 70
+ARRAY (282) 6 7 8 9 10 11
+OF (283) 6
+DEUX_P (284) 6 8 10 11
+T_BEGIN (285) 38 39
+NUMBER (286) 6 8 10 11 68
+IDENT (287) 1 2 3 4 12 13 14 15 18 19 26 27 28 29 31 43 44 60 61 62
+    69 70 71 72
 
 
 Nonterminals, with rules where they appear
@@ -154,43 +147,39 @@ $accept (33)
 program (34)
     on left: 1 2 3 4, on right: 0
 type (35)
-    on left: 5 6 7 8 9 10 11, on right: 13 14
+    on left: 5 6 7 8 9 10 11, on right: 12 13
 declaration (36)
-    on left: 12, on right: 17 18
-declaration_corps (37)
-    on left: 13 14 15 16, on right: 12 37 38
-liste_declarations (38)
-    on left: 17 18, on right: 1 3 18 24 26
-liste_identificateurs (39)
-    on left: 19 20, on right: 13 14 15 16 20 57 59
-declaration_methodes (40)
-    on left: 21 22, on right: 1 2 22
-declaration_methode (41)
-    on left: 23 24 25 26, on right: 21 22
-entete_methode (42)
-    on left: 27 28 29 30 31 32, on right: 23 24 25 26
-arguments (43)
-    on left: 33 34 35 36, on right: 27 30 32
-liste_parametres (44)
-    on left: 37 38, on right: 33 35 38
-instruction_composee (45)
-    on left: 39 40, on right: 1 2 3 23 24
-liste_instructions (46)
-    on left: 41 42 43, on right: 39 40 43
-instruction (47)
-    on left: 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60, on right:
-    41 42 43 47 50 52 53
-lvalue (48)
-    on left: 61 62 63 64, on right: 44 45
-appel_methode (49)
-    on left: 65 66 67, on right: 46
-liste_expressions (50)
-    on left: 68 69, on right: 65 67 69
-expression (51)
-    on left: 70 71 72, on right: 44 47 49 50 51 52 53 54 56 62 63 68
-    69 75 76 78 79
-facteur (52)
-    on left: 73 74 75 76 77 78 79 80, on right: 70 71 72
+    on left: 12 13 14 15, on right: 16 17 36 37
+liste_declarations (37)
+    on left: 16 17, on right: 1 3 17 23 25
+liste_identificateurs (38)
+    on left: 18 19, on right: 19 56 58
+declaration_methodes (39)
+    on left: 20 21, on right: 1 2 21
+declaration_methode (40)
+    on left: 22 23 24 25, on right: 20 21
+entete_methode (41)
+    on left: 26 27 28 29 30 31, on right: 22 23 24 25
+arguments (42)
+    on left: 32 33 34 35, on right: 26 29 31
+liste_parametres (43)
+    on left: 36 37, on right: 32 34 37
+instruction_composee (44)
+    on left: 38 39, on right: 1 2 3 22 23
+liste_instructions (45)
+    on left: 40 41 42, on right: 38 39 42
+instruction (46)
+    on left: 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59, on right:
+    40 41 42 46 49 51 52
+appel_methode (47)
+    on left: 60 61 62, on right: 45
+liste_expressions (48)
+    on left: 63 64, on right: 60 62 64
+expression (49)
+    on left: 65 66 67, on right: 43 46 48 49 50 51 52 53 55 63 64 70
+    71 73 74
+facteur (50)
+    on left: 68 69 70 71 72 73 74 75, on right: 65 66 67
 
 
 state 0
@@ -263,41 +252,44 @@ state 6
 
 state 7
 
-   30 entete_methode: error . IDENT arguments PUNCT_POINT_VIRGULE
+   29 entete_methode: error . IDENT arguments PUNCT_POINT_VIRGULE
 
     IDENT  shift, and go to state 15
 
 
 state 8
 
-   12 declaration: VAR . declaration_corps
+   12 declaration: VAR . IDENT PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE
+   13            | VAR . IDENT PUNCT_DEUX_POINTS type error
+   14            | VAR . IDENT error
+   15            | VAR . IDENT PUNCT_DEUX_POINTS error
 
     IDENT  shift, and go to state 16
-
-    declaration_corps      go to state 17
-    liste_identificateurs  go to state 18
 
 
 state 9
 
-   27 entete_methode: PROCEDURE . IDENT arguments PUNCT_POINT_VIRGULE
-   28               | PROCEDURE . IDENT PUNCT_POINT_VIRGULE
-   29               | PROCEDURE . IDENT error
-   31               | PROCEDURE . error
-   32               | PROCEDURE . IDENT arguments error
+   26 entete_methode: PROCEDURE . IDENT arguments PUNCT_POINT_VIRGULE
+   27               | PROCEDURE . IDENT PUNCT_POINT_VIRGULE
+   28               | PROCEDURE . IDENT error
+   30               | PROCEDURE . error
+   31               | PROCEDURE . IDENT arguments error
 
-    error  shift, and go to state 19
-    IDENT  shift, and go to state 20
+    error  shift, and go to state 17
+    IDENT  shift, and go to state 18
 
 
 state 10
 
-   17 liste_declarations: declaration .
-   18                   | declaration . PUNCT_VIRGULE liste_declarations
+   16 liste_declarations: declaration .
+   17                   | declaration . liste_declarations
 
-    PUNCT_VIRGULE  shift, and go to state 21
+    VAR  shift, and go to state 8
 
-    $default  reduce using rule 17 (liste_declarations)
+    $default  reduce using rule 16 (liste_declarations)
+
+    declaration         go to state 10
+    liste_declarations  go to state 19
 
 
 state 11
@@ -307,454 +299,400 @@ state 11
 
     error      shift, and go to state 7
     PROCEDURE  shift, and go to state 9
-    T_BEGIN    shift, and go to state 22
+    T_BEGIN    shift, and go to state 20
 
-    declaration_methodes  go to state 23
+    declaration_methodes  go to state 21
     declaration_methode   go to state 13
     entete_methode        go to state 14
-    instruction_composee  go to state 24
+    instruction_composee  go to state 22
 
 
 state 12
 
     2 program: PROGRAM IDENT PUNCT_POINT_VIRGULE declaration_methodes . instruction_composee
 
-    T_BEGIN  shift, and go to state 22
+    T_BEGIN  shift, and go to state 20
 
-    instruction_composee  go to state 25
+    instruction_composee  go to state 23
 
 
 state 13
 
-   21 declaration_methodes: declaration_methode .
-   22                     | declaration_methode . declaration_methodes
+   20 declaration_methodes: declaration_methode .
+   21                     | declaration_methode . declaration_methodes
 
     error      shift, and go to state 7
     PROCEDURE  shift, and go to state 9
 
-    T_BEGIN  reduce using rule 21 (declaration_methodes)
+    T_BEGIN  reduce using rule 20 (declaration_methodes)
 
-    declaration_methodes  go to state 26
+    declaration_methodes  go to state 24
     declaration_methode   go to state 13
     entete_methode        go to state 14
 
 
 state 14
 
-   23 declaration_methode: entete_methode . instruction_composee
-   24                    | entete_methode . liste_declarations instruction_composee
-   25                    | entete_methode . error
-   26                    | entete_methode . liste_declarations error
+   22 declaration_methode: entete_methode . instruction_composee
+   23                    | entete_methode . liste_declarations instruction_composee
+   24                    | entete_methode . error
+   25                    | entete_methode . liste_declarations error
 
-    error    shift, and go to state 27
+    error    shift, and go to state 25
     VAR      shift, and go to state 8
-    T_BEGIN  shift, and go to state 22
+    T_BEGIN  shift, and go to state 20
 
     declaration           go to state 10
-    liste_declarations    go to state 28
-    instruction_composee  go to state 29
+    liste_declarations    go to state 26
+    instruction_composee  go to state 27
 
 
 state 15
 
-   30 entete_methode: error IDENT . arguments PUNCT_POINT_VIRGULE
+   29 entete_methode: error IDENT . arguments PUNCT_POINT_VIRGULE
 
-    OPEN_PAR  shift, and go to state 30
+    OPEN_PAR  shift, and go to state 28
 
-    arguments  go to state 31
+    arguments  go to state 29
 
 
 state 16
 
-   19 liste_identificateurs: IDENT .
-   20                      | IDENT . PUNCT_VIRGULE liste_identificateurs
+   12 declaration: VAR IDENT . PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE
+   13            | VAR IDENT . PUNCT_DEUX_POINTS type error
+   14            | VAR IDENT . error
+   15            | VAR IDENT . PUNCT_DEUX_POINTS error
 
-    PUNCT_VIRGULE  shift, and go to state 32
-
-    $default  reduce using rule 19 (liste_identificateurs)
+    error              shift, and go to state 30
+    PUNCT_DEUX_POINTS  shift, and go to state 31
 
 
 state 17
 
-   12 declaration: VAR declaration_corps .
+   30 entete_methode: PROCEDURE error .
 
-    $default  reduce using rule 12 (declaration)
+    $default  reduce using rule 30 (entete_methode)
 
 
 state 18
 
-   13 declaration_corps: liste_identificateurs . PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE
-   14                  | liste_identificateurs . PUNCT_DEUX_POINTS type error
-   15                  | liste_identificateurs . error
-   16                  | liste_identificateurs . PUNCT_DEUX_POINTS error
+   26 entete_methode: PROCEDURE IDENT . arguments PUNCT_POINT_VIRGULE
+   27               | PROCEDURE IDENT . PUNCT_POINT_VIRGULE
+   28               | PROCEDURE IDENT . error
+   31               | PROCEDURE IDENT . arguments error
 
-    error              shift, and go to state 33
-    PUNCT_DEUX_POINTS  shift, and go to state 34
+    error                shift, and go to state 32
+    OPEN_PAR             shift, and go to state 28
+    PUNCT_POINT_VIRGULE  shift, and go to state 33
+
+    arguments  go to state 34
 
 
 state 19
 
-   31 entete_methode: PROCEDURE error .
+   17 liste_declarations: declaration liste_declarations .
 
-    $default  reduce using rule 31 (entete_methode)
+    $default  reduce using rule 17 (liste_declarations)
 
 
 state 20
 
-   27 entete_methode: PROCEDURE IDENT . arguments PUNCT_POINT_VIRGULE
-   28               | PROCEDURE IDENT . PUNCT_POINT_VIRGULE
-   29               | PROCEDURE IDENT . error
-   32               | PROCEDURE IDENT . arguments error
+   38 instruction_composee: T_BEGIN . liste_instructions END
+   39                     | T_BEGIN . liste_instructions error
 
-    error                shift, and go to state 35
-    OPEN_PAR             shift, and go to state 30
-    PUNCT_POINT_VIRGULE  shift, and go to state 36
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
 
-    arguments  go to state 37
+    liste_instructions  go to state 39
+    instruction         go to state 40
+    appel_methode       go to state 41
 
 
 state 21
 
-   18 liste_declarations: declaration PUNCT_VIRGULE . liste_declarations
+    1 program: PROGRAM IDENT PUNCT_POINT_VIRGULE liste_declarations declaration_methodes . instruction_composee
 
-    VAR  shift, and go to state 8
+    T_BEGIN  shift, and go to state 20
 
-    declaration         go to state 10
-    liste_declarations  go to state 38
+    instruction_composee  go to state 42
 
 
 state 22
-
-   39 instruction_composee: T_BEGIN . liste_instructions END
-   40                     | T_BEGIN . liste_instructions error
-
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
-
-    liste_instructions  go to state 43
-    instruction         go to state 44
-    lvalue              go to state 45
-    appel_methode       go to state 46
-
-
-state 23
-
-    1 program: PROGRAM IDENT PUNCT_POINT_VIRGULE liste_declarations declaration_methodes . instruction_composee
-
-    T_BEGIN  shift, and go to state 22
-
-    instruction_composee  go to state 47
-
-
-state 24
 
     3 program: PROGRAM IDENT PUNCT_POINT_VIRGULE liste_declarations instruction_composee .
 
     $default  reduce using rule 3 (program)
 
 
-state 25
+state 23
 
     2 program: PROGRAM IDENT PUNCT_POINT_VIRGULE declaration_methodes instruction_composee .
 
     $default  reduce using rule 2 (program)
 
 
+state 24
+
+   21 declaration_methodes: declaration_methode declaration_methodes .
+
+    $default  reduce using rule 21 (declaration_methodes)
+
+
+state 25
+
+   24 declaration_methode: entete_methode error .
+
+    $default  reduce using rule 24 (declaration_methode)
+
+
 state 26
 
-   22 declaration_methodes: declaration_methode declaration_methodes .
+   23 declaration_methode: entete_methode liste_declarations . instruction_composee
+   25                    | entete_methode liste_declarations . error
 
-    $default  reduce using rule 22 (declaration_methodes)
+    error    shift, and go to state 43
+    T_BEGIN  shift, and go to state 20
+
+    instruction_composee  go to state 44
 
 
 state 27
 
-   25 declaration_methode: entete_methode error .
+   22 declaration_methode: entete_methode instruction_composee .
 
-    $default  reduce using rule 25 (declaration_methode)
+    $default  reduce using rule 22 (declaration_methode)
 
 
 state 28
 
-   24 declaration_methode: entete_methode liste_declarations . instruction_composee
-   26                    | entete_methode liste_declarations . error
+   32 arguments: OPEN_PAR . liste_parametres CLOSE_PAR
+   33          | OPEN_PAR . CLOSE_PAR
+   34          | OPEN_PAR . liste_parametres error
+   35          | OPEN_PAR . error
 
-    error    shift, and go to state 48
-    T_BEGIN  shift, and go to state 22
+    error      shift, and go to state 45
+    CLOSE_PAR  shift, and go to state 46
+    VAR        shift, and go to state 8
 
-    instruction_composee  go to state 49
+    declaration       go to state 47
+    liste_parametres  go to state 48
 
 
 state 29
 
-   23 declaration_methode: entete_methode instruction_composee .
+   29 entete_methode: error IDENT arguments . PUNCT_POINT_VIRGULE
 
-    $default  reduce using rule 23 (declaration_methode)
+    PUNCT_POINT_VIRGULE  shift, and go to state 49
 
 
 state 30
 
-   33 arguments: OPEN_PAR . liste_parametres CLOSE_PAR
-   34          | OPEN_PAR . CLOSE_PAR
-   35          | OPEN_PAR . liste_parametres error
-   36          | OPEN_PAR . error
+   14 declaration: VAR IDENT error .
 
-    error      shift, and go to state 50
-    IDENT      shift, and go to state 16
-    CLOSE_PAR  shift, and go to state 51
-
-    declaration_corps      go to state 52
-    liste_identificateurs  go to state 18
-    liste_parametres       go to state 53
+    $default  reduce using rule 14 (declaration)
 
 
 state 31
 
-   30 entete_methode: error IDENT arguments . PUNCT_POINT_VIRGULE
+   12 declaration: VAR IDENT PUNCT_DEUX_POINTS . type PUNCT_POINT_VIRGULE
+   13            | VAR IDENT PUNCT_DEUX_POINTS . type error
+   15            | VAR IDENT PUNCT_DEUX_POINTS . error
 
-    PUNCT_POINT_VIRGULE  shift, and go to state 54
+    error  shift, and go to state 50
+    TYPE   shift, and go to state 51
+    ARRAY  shift, and go to state 52
+
+    type  go to state 53
 
 
 state 32
 
-   20 liste_identificateurs: IDENT PUNCT_VIRGULE . liste_identificateurs
-
-    IDENT  shift, and go to state 16
-
-    liste_identificateurs  go to state 55
-
-
-state 33
-
-   15 declaration_corps: liste_identificateurs error .
-
-    $default  reduce using rule 15 (declaration_corps)
-
-
-state 34
-
-   13 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS . type PUNCT_POINT_VIRGULE
-   14                  | liste_identificateurs PUNCT_DEUX_POINTS . type error
-   16                  | liste_identificateurs PUNCT_DEUX_POINTS . error
-
-    error  shift, and go to state 56
-    TYPE   shift, and go to state 57
-    ARRAY  shift, and go to state 58
-
-    type  go to state 59
-
-
-state 35
-
-   29 entete_methode: PROCEDURE IDENT error .
-
-    $default  reduce using rule 29 (entete_methode)
-
-
-state 36
-
-   28 entete_methode: PROCEDURE IDENT PUNCT_POINT_VIRGULE .
+   28 entete_methode: PROCEDURE IDENT error .
 
     $default  reduce using rule 28 (entete_methode)
 
 
+state 33
+
+   27 entete_methode: PROCEDURE IDENT PUNCT_POINT_VIRGULE .
+
+    $default  reduce using rule 27 (entete_methode)
+
+
+state 34
+
+   26 entete_methode: PROCEDURE IDENT arguments . PUNCT_POINT_VIRGULE
+   31               | PROCEDURE IDENT arguments . error
+
+    error                shift, and go to state 54
+    PUNCT_POINT_VIRGULE  shift, and go to state 55
+
+
+state 35
+
+   46 instruction: IF . expression THEN instruction ELSE instruction
+   47            | IF . error
+   48            | IF . expression THEN error
+   49            | IF . expression THEN instruction ELSE error
+   50            | IF . expression error
+   51            | IF . expression THEN instruction error instruction
+
+    error     shift, and go to state 56
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    expression  go to state 60
+    facteur     go to state 61
+
+
+state 36
+
+   56 instruction: PRINT . OPEN_PAR liste_identificateurs CLOSE_PAR
+   57            | PRINT . error
+   58            | PRINT . OPEN_PAR liste_identificateurs error
+   59            | PRINT . OPEN_PAR error
+
+    error     shift, and go to state 62
+    OPEN_PAR  shift, and go to state 63
+
+
 state 37
 
-   27 entete_methode: PROCEDURE IDENT arguments . PUNCT_POINT_VIRGULE
-   32               | PROCEDURE IDENT arguments . error
+   52 instruction: WHILE . expression DO instruction
+   53            | WHILE . expression error
+   54            | WHILE . error
+   55            | WHILE . expression DO error
 
-    error                shift, and go to state 60
-    PUNCT_POINT_VIRGULE  shift, and go to state 61
+    error     shift, and go to state 64
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    expression  go to state 65
+    facteur     go to state 61
 
 
 state 38
 
-   18 liste_declarations: declaration PUNCT_VIRGULE liste_declarations .
+   43 instruction: IDENT . OPP_AFFECT expression
+   44            | IDENT . error
+   60 appel_methode: IDENT . OPEN_PAR liste_expressions CLOSE_PAR
+   61              | IDENT . OPEN_PAR CLOSE_PAR
+   62              | IDENT . OPEN_PAR liste_expressions error
 
-    $default  reduce using rule 18 (liste_declarations)
+    error       shift, and go to state 66
+    OPP_AFFECT  shift, and go to state 67
+    OPEN_PAR    shift, and go to state 68
 
 
 state 39
 
-   61 lvalue: IDENT .
-   62       | IDENT . OPEN_CRO expression CLOSE_CRO
-   63       | IDENT . OPEN_CRO expression error
-   64       | IDENT . OPEN_CRO error
-   65 appel_methode: IDENT . OPEN_PAR liste_expressions CLOSE_PAR
-   66              | IDENT . OPEN_PAR CLOSE_PAR
-   67              | IDENT . OPEN_PAR liste_expressions error
+   38 instruction_composee: T_BEGIN liste_instructions . END
+   39                     | T_BEGIN liste_instructions . error
 
-    OPEN_PAR  shift, and go to state 62
-    OPEN_CRO  shift, and go to state 63
-
-    $default  reduce using rule 61 (lvalue)
+    error  shift, and go to state 69
+    END    shift, and go to state 70
 
 
 state 40
 
-   47 instruction: IF . expression THEN instruction ELSE instruction
-   48            | IF . error
-   49            | IF . expression THEN error
-   50            | IF . expression THEN instruction ELSE error
-   51            | IF . expression error
-   52            | IF . expression THEN instruction error instruction
+   40 liste_instructions: instruction . PUNCT_POINT_VIRGULE
+   41                   | instruction . error
+   42                   | instruction . PUNCT_POINT_VIRGULE liste_instructions
 
-    error     shift, and go to state 64
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    expression  go to state 68
-    facteur     go to state 69
+    error                shift, and go to state 71
+    PUNCT_POINT_VIRGULE  shift, and go to state 72
 
 
 state 41
 
-   57 instruction: PRINT . OPEN_PAR liste_identificateurs CLOSE_PAR
-   58            | PRINT . error
-   59            | PRINT . OPEN_PAR liste_identificateurs error
-   60            | PRINT . OPEN_PAR error
+   45 instruction: appel_methode .
 
-    error     shift, and go to state 70
-    OPEN_PAR  shift, and go to state 71
+    $default  reduce using rule 45 (instruction)
 
 
 state 42
-
-   53 instruction: WHILE . expression DO instruction
-   54            | WHILE . expression error
-   55            | WHILE . error
-   56            | WHILE . expression DO error
-
-    error     shift, and go to state 72
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    expression  go to state 73
-    facteur     go to state 69
-
-
-state 43
-
-   39 instruction_composee: T_BEGIN liste_instructions . END
-   40                     | T_BEGIN liste_instructions . error
-
-    error  shift, and go to state 74
-    END    shift, and go to state 75
-
-
-state 44
-
-   41 liste_instructions: instruction . PUNCT_POINT_VIRGULE
-   42                   | instruction . error
-   43                   | instruction . PUNCT_POINT_VIRGULE liste_instructions
-
-    error                shift, and go to state 76
-    PUNCT_POINT_VIRGULE  shift, and go to state 77
-
-
-state 45
-
-   44 instruction: lvalue . OPP_AFFECT expression
-   45            | lvalue . error
-
-    error       shift, and go to state 78
-    OPP_AFFECT  shift, and go to state 79
-
-
-state 46
-
-   46 instruction: appel_methode .
-
-    $default  reduce using rule 46 (instruction)
-
-
-state 47
 
     1 program: PROGRAM IDENT PUNCT_POINT_VIRGULE liste_declarations declaration_methodes instruction_composee .
 
     $default  reduce using rule 1 (program)
 
 
+state 43
+
+   25 declaration_methode: entete_methode liste_declarations error .
+
+    $default  reduce using rule 25 (declaration_methode)
+
+
+state 44
+
+   23 declaration_methode: entete_methode liste_declarations instruction_composee .
+
+    $default  reduce using rule 23 (declaration_methode)
+
+
+state 45
+
+   35 arguments: OPEN_PAR error .
+
+    $default  reduce using rule 35 (arguments)
+
+
+state 46
+
+   33 arguments: OPEN_PAR CLOSE_PAR .
+
+    $default  reduce using rule 33 (arguments)
+
+
+state 47
+
+   36 liste_parametres: declaration .
+   37                 | declaration . liste_parametres
+
+    VAR  shift, and go to state 8
+
+    $default  reduce using rule 36 (liste_parametres)
+
+    declaration       go to state 47
+    liste_parametres  go to state 73
+
+
 state 48
 
-   26 declaration_methode: entete_methode liste_declarations error .
+   32 arguments: OPEN_PAR liste_parametres . CLOSE_PAR
+   34          | OPEN_PAR liste_parametres . error
 
-    $default  reduce using rule 26 (declaration_methode)
+    error      shift, and go to state 74
+    CLOSE_PAR  shift, and go to state 75
 
 
 state 49
 
-   24 declaration_methode: entete_methode liste_declarations instruction_composee .
+   29 entete_methode: error IDENT arguments PUNCT_POINT_VIRGULE .
 
-    $default  reduce using rule 24 (declaration_methode)
+    $default  reduce using rule 29 (entete_methode)
 
 
 state 50
 
-   36 arguments: OPEN_PAR error .
+   15 declaration: VAR IDENT PUNCT_DEUX_POINTS error .
 
-    $default  reduce using rule 36 (arguments)
+    $default  reduce using rule 15 (declaration)
 
 
 state 51
-
-   34 arguments: OPEN_PAR CLOSE_PAR .
-
-    $default  reduce using rule 34 (arguments)
-
-
-state 52
-
-   37 liste_parametres: declaration_corps .
-   38                 | declaration_corps . PUNCT_POINT_VIRGULE liste_parametres
-
-    PUNCT_POINT_VIRGULE  shift, and go to state 80
-
-    $default  reduce using rule 37 (liste_parametres)
-
-
-state 53
-
-   33 arguments: OPEN_PAR liste_parametres . CLOSE_PAR
-   35          | OPEN_PAR liste_parametres . error
-
-    error      shift, and go to state 81
-    CLOSE_PAR  shift, and go to state 82
-
-
-state 54
-
-   30 entete_methode: error IDENT arguments PUNCT_POINT_VIRGULE .
-
-    $default  reduce using rule 30 (entete_methode)
-
-
-state 55
-
-   20 liste_identificateurs: IDENT PUNCT_VIRGULE liste_identificateurs .
-
-    $default  reduce using rule 20 (liste_identificateurs)
-
-
-state 56
-
-   16 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS error .
-
-    $default  reduce using rule 16 (declaration_corps)
-
-
-state 57
 
     5 type: TYPE .
 
     $default  reduce using rule 5 (type)
 
 
-state 58
+state 52
 
     6 type: ARRAY . OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO OF TYPE
     7     | ARRAY . error
@@ -763,256 +701,236 @@ state 58
    10     | ARRAY . OPEN_CRO NUMBER DEUX_P error
    11     | ARRAY . OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO
 
-    error     shift, and go to state 83
-    OPEN_CRO  shift, and go to state 84
+    error     shift, and go to state 76
+    OPEN_CRO  shift, and go to state 77
+
+
+state 53
+
+   12 declaration: VAR IDENT PUNCT_DEUX_POINTS type . PUNCT_POINT_VIRGULE
+   13            | VAR IDENT PUNCT_DEUX_POINTS type . error
+
+    error                shift, and go to state 78
+    PUNCT_POINT_VIRGULE  shift, and go to state 79
+
+
+state 54
+
+   31 entete_methode: PROCEDURE IDENT arguments error .
+
+    $default  reduce using rule 31 (entete_methode)
+
+
+state 55
+
+   26 entete_methode: PROCEDURE IDENT arguments PUNCT_POINT_VIRGULE .
+
+    $default  reduce using rule 26 (entete_methode)
+
+
+state 56
+
+   47 instruction: IF error .
+
+    $default  reduce using rule 47 (instruction)
+
+
+state 57
+
+   73 facteur: OPEN_PAR . expression CLOSE_PAR
+   74        | OPEN_PAR . expression error
+   75        | OPEN_PAR . error
+
+    error     shift, and go to state 80
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    expression  go to state 81
+    facteur     go to state 61
+
+
+state 58
+
+   68 facteur: NUMBER .
+
+    $default  reduce using rule 68 (facteur)
 
 
 state 59
 
-   13 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS type . PUNCT_POINT_VIRGULE
-   14                  | liste_identificateurs PUNCT_DEUX_POINTS type . error
+   69 facteur: IDENT .
+   70        | IDENT . OPEN_CRO expression CLOSE_CRO
+   71        | IDENT . OPEN_CRO expression error
+   72        | IDENT . OPEN_CRO error
 
-    error                shift, and go to state 85
-    PUNCT_POINT_VIRGULE  shift, and go to state 86
+    OPEN_CRO  shift, and go to state 82
+
+    $default  reduce using rule 69 (facteur)
 
 
 state 60
 
-   32 entete_methode: PROCEDURE IDENT arguments error .
+   46 instruction: IF expression . THEN instruction ELSE instruction
+   48            | IF expression . THEN error
+   49            | IF expression . THEN instruction ELSE error
+   50            | IF expression . error
+   51            | IF expression . THEN instruction error instruction
 
-    $default  reduce using rule 32 (entete_methode)
+    error  shift, and go to state 83
+    THEN   shift, and go to state 84
 
 
 state 61
 
-   27 entete_methode: PROCEDURE IDENT arguments PUNCT_POINT_VIRGULE .
+   65 expression: facteur .
+   66           | facteur . ADD_OP facteur
+   67           | facteur . MUL_OP facteur
 
-    $default  reduce using rule 27 (entete_methode)
+    MUL_OP  shift, and go to state 85
+    ADD_OP  shift, and go to state 86
+
+    $default  reduce using rule 65 (expression)
 
 
 state 62
 
-   65 appel_methode: IDENT OPEN_PAR . liste_expressions CLOSE_PAR
-   66              | IDENT OPEN_PAR . CLOSE_PAR
-   67              | IDENT OPEN_PAR . liste_expressions error
+   57 instruction: PRINT error .
 
-    IDENT      shift, and go to state 65
-    NUMBER     shift, and go to state 66
-    OPEN_PAR   shift, and go to state 67
-    CLOSE_PAR  shift, and go to state 87
-
-    liste_expressions  go to state 88
-    expression         go to state 89
-    facteur            go to state 69
+    $default  reduce using rule 57 (instruction)
 
 
 state 63
 
-   62 lvalue: IDENT OPEN_CRO . expression CLOSE_CRO
-   63       | IDENT OPEN_CRO . expression error
-   64       | IDENT OPEN_CRO . error
+   56 instruction: PRINT OPEN_PAR . liste_identificateurs CLOSE_PAR
+   58            | PRINT OPEN_PAR . liste_identificateurs error
+   59            | PRINT OPEN_PAR . error
 
-    error     shift, and go to state 90
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
+    error  shift, and go to state 87
+    IDENT  shift, and go to state 88
 
-    expression  go to state 91
-    facteur     go to state 69
+    liste_identificateurs  go to state 89
 
 
 state 64
 
-   48 instruction: IF error .
+   54 instruction: WHILE error .
 
-    $default  reduce using rule 48 (instruction)
+    $default  reduce using rule 54 (instruction)
 
 
 state 65
 
-   74 facteur: IDENT .
-   75        | IDENT . OPEN_CRO expression CLOSE_CRO
-   76        | IDENT . OPEN_CRO expression error
-   77        | IDENT . OPEN_CRO error
+   52 instruction: WHILE expression . DO instruction
+   53            | WHILE expression . error
+   55            | WHILE expression . DO error
 
-    OPEN_CRO  shift, and go to state 92
-
-    $default  reduce using rule 74 (facteur)
+    error  shift, and go to state 90
+    DO     shift, and go to state 91
 
 
 state 66
 
-   73 facteur: NUMBER .
+   44 instruction: IDENT error .
 
-    $default  reduce using rule 73 (facteur)
+    $default  reduce using rule 44 (instruction)
 
 
 state 67
 
-   78 facteur: OPEN_PAR . expression CLOSE_PAR
-   79        | OPEN_PAR . expression error
-   80        | OPEN_PAR . error
+   43 instruction: IDENT OPP_AFFECT . expression
 
-    error     shift, and go to state 93
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
 
-    expression  go to state 94
-    facteur     go to state 69
+    expression  go to state 92
+    facteur     go to state 61
 
 
 state 68
 
-   47 instruction: IF expression . THEN instruction ELSE instruction
-   49            | IF expression . THEN error
-   50            | IF expression . THEN instruction ELSE error
-   51            | IF expression . error
-   52            | IF expression . THEN instruction error instruction
+   60 appel_methode: IDENT OPEN_PAR . liste_expressions CLOSE_PAR
+   61              | IDENT OPEN_PAR . CLOSE_PAR
+   62              | IDENT OPEN_PAR . liste_expressions error
 
-    error  shift, and go to state 95
-    THEN   shift, and go to state 96
+    OPEN_PAR   shift, and go to state 57
+    CLOSE_PAR  shift, and go to state 93
+    NUMBER     shift, and go to state 58
+    IDENT      shift, and go to state 59
+
+    liste_expressions  go to state 94
+    expression         go to state 95
+    facteur            go to state 61
 
 
 state 69
 
-   70 expression: facteur .
-   71           | facteur . ADD_OP facteur
-   72           | facteur . MUL_OP facteur
-
-    MUL_OP  shift, and go to state 97
-    ADD_OP  shift, and go to state 98
-
-    $default  reduce using rule 70 (expression)
-
-
-state 70
-
-   58 instruction: PRINT error .
-
-    $default  reduce using rule 58 (instruction)
-
-
-state 71
-
-   57 instruction: PRINT OPEN_PAR . liste_identificateurs CLOSE_PAR
-   59            | PRINT OPEN_PAR . liste_identificateurs error
-   60            | PRINT OPEN_PAR . error
-
-    error  shift, and go to state 99
-    IDENT  shift, and go to state 16
-
-    liste_identificateurs  go to state 100
-
-
-state 72
-
-   55 instruction: WHILE error .
-
-    $default  reduce using rule 55 (instruction)
-
-
-state 73
-
-   53 instruction: WHILE expression . DO instruction
-   54            | WHILE expression . error
-   56            | WHILE expression . DO error
-
-    error  shift, and go to state 101
-    DO     shift, and go to state 102
-
-
-state 74
-
-   40 instruction_composee: T_BEGIN liste_instructions error .
-
-    $default  reduce using rule 40 (instruction_composee)
-
-
-state 75
-
-   39 instruction_composee: T_BEGIN liste_instructions END .
+   39 instruction_composee: T_BEGIN liste_instructions error .
 
     $default  reduce using rule 39 (instruction_composee)
 
 
-state 76
+state 70
 
-   42 liste_instructions: instruction error .
+   38 instruction_composee: T_BEGIN liste_instructions END .
 
-    $default  reduce using rule 42 (liste_instructions)
+    $default  reduce using rule 38 (instruction_composee)
 
 
-state 77
+state 71
 
-   41 liste_instructions: instruction PUNCT_POINT_VIRGULE .
-   43                   | instruction PUNCT_POINT_VIRGULE . liste_instructions
-
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
+   41 liste_instructions: instruction error .
 
     $default  reduce using rule 41 (liste_instructions)
 
-    liste_instructions  go to state 103
-    instruction         go to state 44
-    lvalue              go to state 45
-    appel_methode       go to state 46
+
+state 72
+
+   40 liste_instructions: instruction PUNCT_POINT_VIRGULE .
+   42                   | instruction PUNCT_POINT_VIRGULE . liste_instructions
+
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
+
+    $default  reduce using rule 40 (liste_instructions)
+
+    liste_instructions  go to state 96
+    instruction         go to state 40
+    appel_methode       go to state 41
 
 
-state 78
+state 73
 
-   45 instruction: lvalue error .
+   37 liste_parametres: declaration liste_parametres .
 
-    $default  reduce using rule 45 (instruction)
-
-
-state 79
-
-   44 instruction: lvalue OPP_AFFECT . expression
-
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    expression  go to state 104
-    facteur     go to state 69
+    $default  reduce using rule 37 (liste_parametres)
 
 
-state 80
+state 74
 
-   38 liste_parametres: declaration_corps PUNCT_POINT_VIRGULE . liste_parametres
+   34 arguments: OPEN_PAR liste_parametres error .
 
-    IDENT  shift, and go to state 16
-
-    declaration_corps      go to state 52
-    liste_identificateurs  go to state 18
-    liste_parametres       go to state 105
+    $default  reduce using rule 34 (arguments)
 
 
-state 81
+state 75
 
-   35 arguments: OPEN_PAR liste_parametres error .
+   32 arguments: OPEN_PAR liste_parametres CLOSE_PAR .
 
-    $default  reduce using rule 35 (arguments)
-
-
-state 82
-
-   33 arguments: OPEN_PAR liste_parametres CLOSE_PAR .
-
-    $default  reduce using rule 33 (arguments)
+    $default  reduce using rule 32 (arguments)
 
 
-state 83
+state 76
 
     7 type: ARRAY error .
 
     $default  reduce using rule 7 (type)
 
 
-state 84
+state 77
 
     6 type: ARRAY OPEN_CRO . NUMBER DEUX_P NUMBER CLOSE_CRO OF TYPE
     8     | ARRAY OPEN_CRO . NUMBER DEUX_P NUMBER
@@ -1020,468 +938,453 @@ state 84
    10     | ARRAY OPEN_CRO . NUMBER DEUX_P error
    11     | ARRAY OPEN_CRO . NUMBER DEUX_P NUMBER CLOSE_CRO
 
-    error   shift, and go to state 106
-    NUMBER  shift, and go to state 107
+    error   shift, and go to state 97
+    NUMBER  shift, and go to state 98
+
+
+state 78
+
+   13 declaration: VAR IDENT PUNCT_DEUX_POINTS type error .
+
+    $default  reduce using rule 13 (declaration)
+
+
+state 79
+
+   12 declaration: VAR IDENT PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE .
+
+    $default  reduce using rule 12 (declaration)
+
+
+state 80
+
+   75 facteur: OPEN_PAR error .
+
+    $default  reduce using rule 75 (facteur)
+
+
+state 81
+
+   73 facteur: OPEN_PAR expression . CLOSE_PAR
+   74        | OPEN_PAR expression . error
+
+    error      shift, and go to state 99
+    CLOSE_PAR  shift, and go to state 100
+
+
+state 82
+
+   70 facteur: IDENT OPEN_CRO . expression CLOSE_CRO
+   71        | IDENT OPEN_CRO . expression error
+   72        | IDENT OPEN_CRO . error
+
+    error     shift, and go to state 101
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    expression  go to state 102
+    facteur     go to state 61
+
+
+state 83
+
+   50 instruction: IF expression error .
+
+    $default  reduce using rule 50 (instruction)
+
+
+state 84
+
+   46 instruction: IF expression THEN . instruction ELSE instruction
+   48            | IF expression THEN . error
+   49            | IF expression THEN . instruction ELSE error
+   51            | IF expression THEN . instruction error instruction
+
+    error  shift, and go to state 103
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
+
+    instruction    go to state 104
+    appel_methode  go to state 41
 
 
 state 85
 
-   14 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS type error .
+   67 expression: facteur MUL_OP . facteur
 
-    $default  reduce using rule 14 (declaration_corps)
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    facteur  go to state 105
 
 
 state 86
 
-   13 declaration_corps: liste_identificateurs PUNCT_DEUX_POINTS type PUNCT_POINT_VIRGULE .
+   66 expression: facteur ADD_OP . facteur
 
-    $default  reduce using rule 13 (declaration_corps)
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    facteur  go to state 106
 
 
 state 87
 
-   66 appel_methode: IDENT OPEN_PAR CLOSE_PAR .
+   59 instruction: PRINT OPEN_PAR error .
 
-    $default  reduce using rule 66 (appel_methode)
+    $default  reduce using rule 59 (instruction)
 
 
 state 88
 
-   65 appel_methode: IDENT OPEN_PAR liste_expressions . CLOSE_PAR
-   67              | IDENT OPEN_PAR liste_expressions . error
-   69 liste_expressions: liste_expressions . PUNCT_VIRGULE expression
+   18 liste_identificateurs: IDENT .
+   19                      | IDENT . PUNCT_VIRGULE liste_identificateurs
 
-    error          shift, and go to state 108
-    CLOSE_PAR      shift, and go to state 109
-    PUNCT_VIRGULE  shift, and go to state 110
+    PUNCT_VIRGULE  shift, and go to state 107
+
+    $default  reduce using rule 18 (liste_identificateurs)
 
 
 state 89
 
-   68 liste_expressions: expression .
+   56 instruction: PRINT OPEN_PAR liste_identificateurs . CLOSE_PAR
+   58            | PRINT OPEN_PAR liste_identificateurs . error
 
-    $default  reduce using rule 68 (liste_expressions)
+    error      shift, and go to state 108
+    CLOSE_PAR  shift, and go to state 109
 
 
 state 90
 
-   64 lvalue: IDENT OPEN_CRO error .
+   53 instruction: WHILE expression error .
 
-    $default  reduce using rule 64 (lvalue)
+    $default  reduce using rule 53 (instruction)
 
 
 state 91
 
-   62 lvalue: IDENT OPEN_CRO expression . CLOSE_CRO
-   63       | IDENT OPEN_CRO expression . error
+   52 instruction: WHILE expression DO . instruction
+   55            | WHILE expression DO . error
 
-    error      shift, and go to state 111
-    CLOSE_CRO  shift, and go to state 112
+    error  shift, and go to state 110
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
+
+    instruction    go to state 111
+    appel_methode  go to state 41
 
 
 state 92
 
-   75 facteur: IDENT OPEN_CRO . expression CLOSE_CRO
-   76        | IDENT OPEN_CRO . expression error
-   77        | IDENT OPEN_CRO . error
+   43 instruction: IDENT OPP_AFFECT expression .
 
-    error     shift, and go to state 113
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    expression  go to state 114
-    facteur     go to state 69
+    $default  reduce using rule 43 (instruction)
 
 
 state 93
 
-   80 facteur: OPEN_PAR error .
+   61 appel_methode: IDENT OPEN_PAR CLOSE_PAR .
 
-    $default  reduce using rule 80 (facteur)
+    $default  reduce using rule 61 (appel_methode)
 
 
 state 94
 
-   78 facteur: OPEN_PAR expression . CLOSE_PAR
-   79        | OPEN_PAR expression . error
+   60 appel_methode: IDENT OPEN_PAR liste_expressions . CLOSE_PAR
+   62              | IDENT OPEN_PAR liste_expressions . error
+   64 liste_expressions: liste_expressions . PUNCT_VIRGULE expression
 
-    error      shift, and go to state 115
-    CLOSE_PAR  shift, and go to state 116
+    error          shift, and go to state 112
+    CLOSE_PAR      shift, and go to state 113
+    PUNCT_VIRGULE  shift, and go to state 114
 
 
 state 95
 
-   51 instruction: IF expression error .
+   63 liste_expressions: expression .
 
-    $default  reduce using rule 51 (instruction)
+    $default  reduce using rule 63 (liste_expressions)
 
 
 state 96
 
-   47 instruction: IF expression THEN . instruction ELSE instruction
-   49            | IF expression THEN . error
-   50            | IF expression THEN . instruction ELSE error
-   52            | IF expression THEN . instruction error instruction
+   42 liste_instructions: instruction PUNCT_POINT_VIRGULE liste_instructions .
 
-    error  shift, and go to state 117
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
-
-    instruction    go to state 118
-    lvalue         go to state 45
-    appel_methode  go to state 46
+    $default  reduce using rule 42 (liste_instructions)
 
 
 state 97
-
-   72 expression: facteur MUL_OP . facteur
-
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    facteur  go to state 119
-
-
-state 98
-
-   71 expression: facteur ADD_OP . facteur
-
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    facteur  go to state 120
-
-
-state 99
-
-   60 instruction: PRINT OPEN_PAR error .
-
-    $default  reduce using rule 60 (instruction)
-
-
-state 100
-
-   57 instruction: PRINT OPEN_PAR liste_identificateurs . CLOSE_PAR
-   59            | PRINT OPEN_PAR liste_identificateurs . error
-
-    error      shift, and go to state 121
-    CLOSE_PAR  shift, and go to state 122
-
-
-state 101
-
-   54 instruction: WHILE expression error .
-
-    $default  reduce using rule 54 (instruction)
-
-
-state 102
-
-   53 instruction: WHILE expression DO . instruction
-   56            | WHILE expression DO . error
-
-    error  shift, and go to state 123
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
-
-    instruction    go to state 124
-    lvalue         go to state 45
-    appel_methode  go to state 46
-
-
-state 103
-
-   43 liste_instructions: instruction PUNCT_POINT_VIRGULE liste_instructions .
-
-    $default  reduce using rule 43 (liste_instructions)
-
-
-state 104
-
-   44 instruction: lvalue OPP_AFFECT expression .
-
-    $default  reduce using rule 44 (instruction)
-
-
-state 105
-
-   38 liste_parametres: declaration_corps PUNCT_POINT_VIRGULE liste_parametres .
-
-    $default  reduce using rule 38 (liste_parametres)
-
-
-state 106
 
     9 type: ARRAY OPEN_CRO error .
 
     $default  reduce using rule 9 (type)
 
 
-state 107
+state 98
 
     6 type: ARRAY OPEN_CRO NUMBER . DEUX_P NUMBER CLOSE_CRO OF TYPE
     8     | ARRAY OPEN_CRO NUMBER . DEUX_P NUMBER
    10     | ARRAY OPEN_CRO NUMBER . DEUX_P error
    11     | ARRAY OPEN_CRO NUMBER . DEUX_P NUMBER CLOSE_CRO
 
-    DEUX_P  shift, and go to state 125
+    DEUX_P  shift, and go to state 115
+
+
+state 99
+
+   74 facteur: OPEN_PAR expression error .
+
+    $default  reduce using rule 74 (facteur)
+
+
+state 100
+
+   73 facteur: OPEN_PAR expression CLOSE_PAR .
+
+    $default  reduce using rule 73 (facteur)
+
+
+state 101
+
+   72 facteur: IDENT OPEN_CRO error .
+
+    $default  reduce using rule 72 (facteur)
+
+
+state 102
+
+   70 facteur: IDENT OPEN_CRO expression . CLOSE_CRO
+   71        | IDENT OPEN_CRO expression . error
+
+    error      shift, and go to state 116
+    CLOSE_CRO  shift, and go to state 117
+
+
+state 103
+
+   48 instruction: IF expression THEN error .
+
+    $default  reduce using rule 48 (instruction)
+
+
+state 104
+
+   46 instruction: IF expression THEN instruction . ELSE instruction
+   49            | IF expression THEN instruction . ELSE error
+   51            | IF expression THEN instruction . error instruction
+
+    error  shift, and go to state 118
+    ELSE   shift, and go to state 119
+
+
+state 105
+
+   67 expression: facteur MUL_OP facteur .
+
+    $default  reduce using rule 67 (expression)
+
+
+state 106
+
+   66 expression: facteur ADD_OP facteur .
+
+    $default  reduce using rule 66 (expression)
+
+
+state 107
+
+   19 liste_identificateurs: IDENT PUNCT_VIRGULE . liste_identificateurs
+
+    IDENT  shift, and go to state 88
+
+    liste_identificateurs  go to state 120
 
 
 state 108
 
-   67 appel_methode: IDENT OPEN_PAR liste_expressions error .
+   58 instruction: PRINT OPEN_PAR liste_identificateurs error .
 
-    $default  reduce using rule 67 (appel_methode)
+    $default  reduce using rule 58 (instruction)
 
 
 state 109
 
-   65 appel_methode: IDENT OPEN_PAR liste_expressions CLOSE_PAR .
-
-    $default  reduce using rule 65 (appel_methode)
-
-
-state 110
-
-   69 liste_expressions: liste_expressions PUNCT_VIRGULE . expression
-
-    IDENT     shift, and go to state 65
-    NUMBER    shift, and go to state 66
-    OPEN_PAR  shift, and go to state 67
-
-    expression  go to state 126
-    facteur     go to state 69
-
-
-state 111
-
-   63 lvalue: IDENT OPEN_CRO expression error .
-
-    $default  reduce using rule 63 (lvalue)
-
-
-state 112
-
-   62 lvalue: IDENT OPEN_CRO expression CLOSE_CRO .
-
-    $default  reduce using rule 62 (lvalue)
-
-
-state 113
-
-   77 facteur: IDENT OPEN_CRO error .
-
-    $default  reduce using rule 77 (facteur)
-
-
-state 114
-
-   75 facteur: IDENT OPEN_CRO expression . CLOSE_CRO
-   76        | IDENT OPEN_CRO expression . error
-
-    error      shift, and go to state 127
-    CLOSE_CRO  shift, and go to state 128
-
-
-state 115
-
-   79 facteur: OPEN_PAR expression error .
-
-    $default  reduce using rule 79 (facteur)
-
-
-state 116
-
-   78 facteur: OPEN_PAR expression CLOSE_PAR .
-
-    $default  reduce using rule 78 (facteur)
-
-
-state 117
-
-   49 instruction: IF expression THEN error .
-
-    $default  reduce using rule 49 (instruction)
-
-
-state 118
-
-   47 instruction: IF expression THEN instruction . ELSE instruction
-   50            | IF expression THEN instruction . ELSE error
-   52            | IF expression THEN instruction . error instruction
-
-    error  shift, and go to state 129
-    ELSE   shift, and go to state 130
-
-
-state 119
-
-   72 expression: facteur MUL_OP facteur .
-
-    $default  reduce using rule 72 (expression)
-
-
-state 120
-
-   71 expression: facteur ADD_OP facteur .
-
-    $default  reduce using rule 71 (expression)
-
-
-state 121
-
-   59 instruction: PRINT OPEN_PAR liste_identificateurs error .
-
-    $default  reduce using rule 59 (instruction)
-
-
-state 122
-
-   57 instruction: PRINT OPEN_PAR liste_identificateurs CLOSE_PAR .
-
-    $default  reduce using rule 57 (instruction)
-
-
-state 123
-
-   56 instruction: WHILE expression DO error .
+   56 instruction: PRINT OPEN_PAR liste_identificateurs CLOSE_PAR .
 
     $default  reduce using rule 56 (instruction)
 
 
-state 124
+state 110
 
-   53 instruction: WHILE expression DO instruction .
+   55 instruction: WHILE expression DO error .
 
-    $default  reduce using rule 53 (instruction)
+    $default  reduce using rule 55 (instruction)
 
 
-state 125
+state 111
+
+   52 instruction: WHILE expression DO instruction .
+
+    $default  reduce using rule 52 (instruction)
+
+
+state 112
+
+   62 appel_methode: IDENT OPEN_PAR liste_expressions error .
+
+    $default  reduce using rule 62 (appel_methode)
+
+
+state 113
+
+   60 appel_methode: IDENT OPEN_PAR liste_expressions CLOSE_PAR .
+
+    $default  reduce using rule 60 (appel_methode)
+
+
+state 114
+
+   64 liste_expressions: liste_expressions PUNCT_VIRGULE . expression
+
+    OPEN_PAR  shift, and go to state 57
+    NUMBER    shift, and go to state 58
+    IDENT     shift, and go to state 59
+
+    expression  go to state 121
+    facteur     go to state 61
+
+
+state 115
 
     6 type: ARRAY OPEN_CRO NUMBER DEUX_P . NUMBER CLOSE_CRO OF TYPE
     8     | ARRAY OPEN_CRO NUMBER DEUX_P . NUMBER
    10     | ARRAY OPEN_CRO NUMBER DEUX_P . error
    11     | ARRAY OPEN_CRO NUMBER DEUX_P . NUMBER CLOSE_CRO
 
-    error   shift, and go to state 131
-    NUMBER  shift, and go to state 132
+    error   shift, and go to state 122
+    NUMBER  shift, and go to state 123
 
 
-state 126
+state 116
 
-   69 liste_expressions: liste_expressions PUNCT_VIRGULE expression .
+   71 facteur: IDENT OPEN_CRO expression error .
 
-    $default  reduce using rule 69 (liste_expressions)
-
-
-state 127
-
-   76 facteur: IDENT OPEN_CRO expression error .
-
-    $default  reduce using rule 76 (facteur)
+    $default  reduce using rule 71 (facteur)
 
 
-state 128
+state 117
 
-   75 facteur: IDENT OPEN_CRO expression CLOSE_CRO .
+   70 facteur: IDENT OPEN_CRO expression CLOSE_CRO .
 
-    $default  reduce using rule 75 (facteur)
-
-
-state 129
-
-   52 instruction: IF expression THEN instruction error . instruction
-
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
-
-    instruction    go to state 133
-    lvalue         go to state 45
-    appel_methode  go to state 46
+    $default  reduce using rule 70 (facteur)
 
 
-state 130
+state 118
 
-   47 instruction: IF expression THEN instruction ELSE . instruction
-   50            | IF expression THEN instruction ELSE . error
+   51 instruction: IF expression THEN instruction error . instruction
 
-    error  shift, and go to state 134
-    IDENT  shift, and go to state 39
-    IF     shift, and go to state 40
-    PRINT  shift, and go to state 41
-    WHILE  shift, and go to state 42
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
 
-    instruction    go to state 135
-    lvalue         go to state 45
-    appel_methode  go to state 46
+    instruction    go to state 124
+    appel_methode  go to state 41
 
 
-state 131
+state 119
+
+   46 instruction: IF expression THEN instruction ELSE . instruction
+   49            | IF expression THEN instruction ELSE . error
+
+    error  shift, and go to state 125
+    IF     shift, and go to state 35
+    PRINT  shift, and go to state 36
+    WHILE  shift, and go to state 37
+    IDENT  shift, and go to state 38
+
+    instruction    go to state 126
+    appel_methode  go to state 41
+
+
+state 120
+
+   19 liste_identificateurs: IDENT PUNCT_VIRGULE liste_identificateurs .
+
+    $default  reduce using rule 19 (liste_identificateurs)
+
+
+state 121
+
+   64 liste_expressions: liste_expressions PUNCT_VIRGULE expression .
+
+    $default  reduce using rule 64 (liste_expressions)
+
+
+state 122
 
    10 type: ARRAY OPEN_CRO NUMBER DEUX_P error .
 
     $default  reduce using rule 10 (type)
 
 
-state 132
+state 123
 
     6 type: ARRAY OPEN_CRO NUMBER DEUX_P NUMBER . CLOSE_CRO OF TYPE
     8     | ARRAY OPEN_CRO NUMBER DEUX_P NUMBER .
    11     | ARRAY OPEN_CRO NUMBER DEUX_P NUMBER . CLOSE_CRO
 
-    CLOSE_CRO  shift, and go to state 136
+    CLOSE_CRO  shift, and go to state 127
 
     $default  reduce using rule 8 (type)
 
 
-state 133
+state 124
 
-   52 instruction: IF expression THEN instruction error instruction .
+   51 instruction: IF expression THEN instruction error instruction .
 
-    $default  reduce using rule 52 (instruction)
-
-
-state 134
-
-   50 instruction: IF expression THEN instruction ELSE error .
-
-    $default  reduce using rule 50 (instruction)
+    $default  reduce using rule 51 (instruction)
 
 
-state 135
+state 125
 
-   47 instruction: IF expression THEN instruction ELSE instruction .
+   49 instruction: IF expression THEN instruction ELSE error .
 
-    $default  reduce using rule 47 (instruction)
+    $default  reduce using rule 49 (instruction)
 
 
-state 136
+state 126
+
+   46 instruction: IF expression THEN instruction ELSE instruction .
+
+    $default  reduce using rule 46 (instruction)
+
+
+state 127
 
     6 type: ARRAY OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO . OF TYPE
    11     | ARRAY OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO .
 
-    OF  shift, and go to state 137
+    OF  shift, and go to state 128
 
     $default  reduce using rule 11 (type)
 
 
-state 137
+state 128
 
     6 type: ARRAY OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO OF . TYPE
 
-    TYPE  shift, and go to state 138
+    TYPE  shift, and go to state 129
 
 
-state 138
+state 129
 
     6 type: ARRAY OPEN_CRO NUMBER DEUX_P NUMBER CLOSE_CRO OF TYPE .
 

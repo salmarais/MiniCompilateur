@@ -52,7 +52,7 @@ deux_points					":"
 
 {bl} /* rien à faire */
 " "  /* rien à faire */
-"\n" {++yylineno;} 
+"\n" {/*++yylineno;*/} 
 begin {return T_BEGIN;}
 program {return PROGRAM;}
 var {return VAR;}
@@ -68,8 +68,8 @@ procedure {return PROCEDURE;}
 print {return PRINT;}
 {commentaire} {return COMMENT;}
 {type} {return TYPE;}
-{identificateur} {strcpy(nom, yytext); fprintf(stderr, "%s \n", yytext); return IDENT;}
-{literal_entier} {yylval = atoi(yytext); return NUMBER;}
+{identificateur} {const char* tmp; tmp = strdup(yytext); yylval.identifier = tmp; return IDENT;}
+{literal_entier} {yylval.number = atoi(yytext); return NUMBER;}
 {keyword} {return KEYWORD;}
 {parenthese_ouvrant} {return OPEN_PAR;}
 {parenthese_fermant} {return CLOSE_PAR;}

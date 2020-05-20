@@ -1,6 +1,8 @@
 program tp;
 var x:integer;
+var y:integer;
 begin
+x:=0;
 print(x);
 print(y);
 end
